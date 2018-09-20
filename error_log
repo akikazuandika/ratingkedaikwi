@@ -1,0 +1,3 @@
+[13-Jun-2018 05:16:56 UTC] PHP Fatal error:  Call to undefined method Admin_model::getPass() in /home/k0898862/public_html/adminrating/application/controllers/Login.php on line 23
+[21-Jun-2018 17:39:02 UTC] PHP Parse error:  syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /home/k0898862/public_html/adminrating/application/controllers/Admin.php on line 155
+[21-Jun-2018 17:40:02 UTC] PHP Parse error:  syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in /home/k0898862/public_html/adminrating/application/controllers/Admin.php on line 186

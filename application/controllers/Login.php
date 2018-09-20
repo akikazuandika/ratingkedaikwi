@@ -13,17 +13,28 @@ class Login extends CI_Controller {
 
 	public function index()
 	{
-		$this->load->view('page/login');
+
 		$username = xss_clean($this->input->post('username'));
 		$password = xss_clean($this->input->post('password'));
+		$submit = xss_clean($this->input->post('btnSubmit'));
 
-		$admin = $this->admin_model->login($username, $password);
+		if (isset($_POST['btnSubmit'])) {
+			
+			$passDb = $this->admin_model->getPass($username);
 
-		if($admin != false){
-			$this->session->set_userdata('username', $username);
-			redirect('/admin/store');
-		}else{
-			echo "Wrong username or password";
+			if(verifyPassword($password, $passDb[0]['password']) == true){
+				$admin = $this->admin_model->settings($username);
+				$this->session->set_userdata('username', $username);
+				$this->session->set_userdata('name', $admin[0]['name']);
+				redirect('/admin/store');
+			}else{
+				echo "Wrong username or password";
+			}
 		}
+
+
+
+
+		$this->load->view('admin/login');
 	}
 }

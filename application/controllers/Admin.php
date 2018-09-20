@@ -18,13 +18,43 @@ class Admin extends CI_Controller {
 
 	public function index()
 	{
-		$this->load->view('welcome_message');
+		$this->load->view('admin/home');
 	}
+
+  public function settings()
+  {
+    $data = array('name' => $this->session->userdata("name"));
+    $data['title'] = "Settings";
+    $data['detail'] = $this->admin_model->settings($this->session->userdata("username"))[0];
+    $this->load->view("admin/part/header", $data);
+    $this->load->view('admin/settings');
+    $this->load->view("admin/part/footer", $data);
+  }
+
+  public function changePass()
+  {
+    $oldPass = xss_clean($this->input->post("oldPass"));
+    $newPass = xss_clean($this->input->post("newPass"));
+    $username = $this->session->userdata("username");
+
+    $passDb = $this->admin_model->getPass($username);
+
+    if(verifyPassword($oldPass, $passDb[0]['password']) == true){
+      $newPassHash = genPassword($newPass);
+      if($this->admin_model->changePass($username, $newPassHash) == true){
+        echo "true";
+      }else{
+        echo "false";
+      };
+    }else{
+      echo "false";
+    };
+  }
 
   public function store()
   {
     $page = 0;
-    $perPage = 5;
+    $perPage = 10;
 
     if($this->input->get("page")){
       $page = (int) $this->input->get("page") - 1;
@@ -73,8 +103,12 @@ class Admin extends CI_Controller {
         }
         $data['stores'][$i]['rating_service'] = $rateServiceFinal[$i]['value'] / count($rateService[$i]);
     }
+    $data['name'] = $this->session->userdata("name");
+    $data['title'] = "Stores";
 
-    $this->load->view('page/store', $data);
+    $this->load->view("admin/part/header", $data);
+    $this->load->view('admin/stores', $data);
+    $this->load->view("admin/part/footer");
   }
 
   public function getStoreById()
@@ -102,10 +136,15 @@ class Admin extends CI_Controller {
 
     $data = array('detail' => $store,
                   'rating_product' => $rateProductFinal,
-                  'rating_service' => $rateServiceFinal
+                  'rating_service' => $rateServiceFinal,
                   );
 
-    $this->load->view('page/storeid', $data);
+    $data['title'] = ucwords($store['store_name']);
+    $data['name'] = $this->session->userdata("name");
+
+    $this->load->view("admin/part/header", $data);
+    $this->load->view('admin/store_id', $data);
+    $this->load->view("admin/part/footer");
   }
 
   public function addStore()
@@ -113,9 +152,10 @@ class Admin extends CI_Controller {
     $name = xss_clean($this->input->post("store_name"));
     $location = xss_clean($this->input->post("store_location"));
     $image = xss_clean($this->input->post("image"));
+    $desc = xss_clean($this->input->post("store_description"));
 
     if($this->input->post("btnSave") != null){
-        $data = array('store_name' => $name, "store_location" => $location);
+        $data = array('store_name' => $name, "store_location" => $location, "description" => $desc);
         if($image != ""){
           $data['image'] = $image;
         }
@@ -128,7 +168,12 @@ class Admin extends CI_Controller {
         }
     }
 
-    $this->load->view("page/editStore", $data);
+    $data['title'] = "Add Store";
+    $data['name'] = $this->session->userdata("name");
+
+    $this->load->view("admin/part/header", $data);
+    $this->load->view("admin/store_add", $data);
+    $this->load->view("admin/part/footer");
   }
 
   public function editStore()
@@ -138,11 +183,12 @@ class Admin extends CI_Controller {
     $name = xss_clean($this->input->post("store_name"));
     $location = xss_clean($this->input->post("store_location"));
     $image = xss_clean($this->input->post("image"));
+    $desc = xss_clean($this->input->post("store_description"));
 
     $data['store'] = $this->store_model->getOne($id)[0];
 
     if($this->input->post("btnSave") != null){
-        $data = array('store_name' => $name, "store_location" => $location);
+        $data = array('store_name' => $name, "store_location" => $location, "description" => $desc);
         if($image != ""){
           $data['image'] = $image;
         }
@@ -155,7 +201,12 @@ class Admin extends CI_Controller {
         }
     }
 
-    $this->load->view("page/editStore", $data);
+    $data['title'] = "Settings - " . ucwords($store['store_name']);
+    $data['name'] = $this->session->userdata("name");
+
+    $this->load->view("admin/part/header", $data);
+    $this->load->view("admin/store_edit", $data);
+    $this->load->view("admin/part/footer");
   }
 
   public function deleteStore()
